@@ -1,4 +1,4 @@
-create deploy-chatui.sh file that will just deploy the genai services needed for the chat ui. 
+create deploy-with-chat.sh file that will just deploy everything the genai services needed for the chat ui. 
 To be clear we will have a deploy.sh that deploys any db and app then a deploy-chatui.sh that deploys the genai bicep files, this mens the chatui can be optionally deployed after the main deployment.
 Make sure the deploy-chatui file sets the environment variables from the genai resources created earlier:
 
