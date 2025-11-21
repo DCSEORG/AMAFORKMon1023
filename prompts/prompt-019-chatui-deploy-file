@@ -1,3 +1,7 @@
-create a second deploy.sh file that will just deploy the genai services needed for the chat ui. 
-To be clear we will have a deploy.sh that deploys any db and app then a deploy-chatui.sh that deploys the genai bicep files.
-Make sure the deploy-chatui file sets the environment variables from the genai resources created earlier (OpenAI endpoint and model, also Cognitive Services/Search endpoint)
+create deploy-chatui.sh file that will just deploy the genai services needed for the chat ui. 
+To be clear we will have a deploy.sh that deploys any db and app then a deploy-chatui.sh that deploys the genai bicep files, this mens the chatui can be optionally deployed after the main deployment.
+Make sure the deploy-chatui file sets the environment variables from the genai resources created earlier:
+
+  OPENAI_ENDPOINT=$(echo $DEPLOYMENT_OUTPUT | jq -r '.openAIEndpoint.value')
+  OPENAI_MODEL_NAME=$(echo $DEPLOYMENT_OUTPUT | jq -r '.openAIModelName.value')
+  SEARCH_ENDPOINT=$(echo $DEPLOYMENT_OUTPUT | jq -r '.searchEndpoint.value')
