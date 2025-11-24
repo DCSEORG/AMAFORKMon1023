@@ -1,0 +1,197 @@
+@page
+@model ChatModel
+@{
+    ViewData["Title"] = "AI Chat";
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+    }
+    .container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+    .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        padding: 30px;
+        margin-bottom: 20px;
+    }
+    .header {
+        background: linear-gradient(90deg, #4A5568 0%, #2D3748 100%);
+        color: white;
+        padding: 20px 30px;
+        border-radius: 12px 12px 0 0;
+        font-size: 28px;
+        font-weight: bold;
+        margin: -30px -30px 20px -30px;
+    }
+    .error-bar {
+        background: #FED7D7;
+        border: 2px solid #FC8181;
+        color: #742A2A;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-weight: 500;
+    }
+    .warning-bar {
+        background: #FEEBC8;
+        border: 2px solid #F6AD55;
+        color: #7C2D12;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-weight: 500;
+    }
+    .chat-container {
+        height: 400px;
+        overflow-y: auto;
+        border: 2px solid #E2E8F0;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        background: #F7FAFC;
+    }
+    .message {
+        margin-bottom: 15px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        max-width: 80%;
+    }
+    .user-message {
+        background: linear-gradient(90deg, #4A5568 0%, #2D3748 100%);
+        color: white;
+        margin-left: auto;
+        text-align: right;
+    }
+    .assistant-message {
+        background: white;
+        border: 2px solid #E2E8F0;
+        color: #2D3748;
+    }
+    .input-container {
+        display: flex;
+        gap: 10px;
+    }
+    .input-container input {
+        flex: 1;
+        padding: 12px 15px;
+        border: 2px solid #E2E8F0;
+        border-radius: 8px;
+        font-size: 16px;
+    }
+    .btn {
+        background: linear-gradient(90deg, #4A5568 0%, #2D3748 100%);
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+    }
+    .nav-links {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    .nav-links a {
+        color: white;
+        text-decoration: none;
+        padding: 10px 20px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+    .nav-links a:hover {
+        background: rgba(255,255,255,0.3);
+    }
+    .suggestions {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #718096;
+    }
+    .suggestion-chip {
+        display: inline-block;
+        background: #EDF2F7;
+        padding: 6px 12px;
+        border-radius: 16px;
+        margin: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .suggestion-chip:hover {
+        background: #CBD5E0;
+    }
+</style>
+
+<div class="container">
+    <div class="nav-links">
+        <a href="/Index">View Expenses</a>
+        <a href="/AddExpense">Add Expense</a>
+        <a href="/ApproveExpenses">Approve Expenses</a>
+        <a href="/Chat">AI Chat</a>
+        <a href="/swagger">API Documentation</a>
+    </div>
+    
+    <div class="card">
+        <div class="header">💬 AI Chat Assistant</div>
+        
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="error-bar">
+                <strong>⚠️ Error:</strong> @Model.ErrorMessage
+            </div>
+        }
+        
+        @if (!string.IsNullOrEmpty(Model.WarningMessage))
+        {
+            <div class="warning-bar">
+                <strong>ℹ️ Note:</strong> @Model.WarningMessage
+            </div>
+        }
+        
+        <div class="chat-container" id="chatContainer">
+            @foreach (var message in Model.Messages)
+            {
+                <div class="message @(message.IsUser ? "user-message" : "assistant-message")">
+                    @message.Content
+                </div>
+            }
+        </div>
+        
+        <form method="post">
+            <div class="input-container">
+                <input type="text" name="userMessage" placeholder="Ask me about expenses... e.g., 'Show me all pending expenses'" required autofocus />
+                <button type="submit" class="btn">Send</button>
+            </div>
+        </form>
+        
+        <div class="suggestions">
+            <strong>Try asking:</strong><br/>
+            <span class="suggestion-chip" onclick="document.querySelector('input[name=userMessage]').value='Show me all pending expenses'">Show pending expenses</span>
+            <span class="suggestion-chip" onclick="document.querySelector('input[name=userMessage]').value='Add a £50 travel expense for today'">Add travel expense</span>
+            <span class="suggestion-chip" onclick="document.querySelector('input[name=userMessage]').value='What are my total expenses?'">Total expenses</span>
+            <span class="suggestion-chip" onclick="document.querySelector('input[name=userMessage]').value='Approve expense 1'">Approve expense</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-scroll chat to bottom
+    var chatContainer = document.getElementById('chatContainer');
+    if (chatContainer) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+</script>
